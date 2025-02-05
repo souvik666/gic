@@ -1,5 +1,5 @@
 {
-  "name": "gic",
+  "name": "@souvik666/gic",
   "version": "1.0.0",
   "main": "index.js",
   "keywords": [],
@@ -10,6 +10,6 @@
   "license": "ISC",
   "description": "",
   "bin": {
-    "git-commit": "./git-commit.sh"
+    "gic": "./gic.sh"
   }
 }
