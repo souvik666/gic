@@ -22,12 +22,23 @@ else
   RESET=""
 fi
 
+# Help function
+show_help() {
+  echo -e "${GREEN}GIC - Git Commit Automation${RESET}"
+  echo -e "Usage: gic [options]"
+  echo -e "\nOptions:"
+  echo -e "  -m, --message   Specify a custom commit message"
+  echo -e "  -d, --dry-run   Simulate commit without actually committing"
+  echo -e "  -h, --help      Show this help message"
+  exit 0
+}
+
 # Default commit tags
-MODIFIED_TAG="🔧 UPDATED"
-ADDED_TAG="✨ ADDED"
-DELETED_TAG="🗑️ REMOVED"
-NEW_TAG="📄 NEW"
-OTHER_TAG="🔄 OTHER"
+MODIFIED_TAG="\ud83d\udee0 UPDATED"
+ADDED_TAG="\u2728 ADDED"
+DELETED_TAG="\ud83d\uddd1\ufe0f REMOVED"
+NEW_TAG="\ud83d\udcc4 NEW"
+OTHER_TAG="\ud83d\udd04 OTHER"
 
 # Load tags from config if available
 if [ -f "$CONFIG_FILE" ]; then
@@ -51,6 +62,9 @@ while [[ $# -gt 0 ]]; do
       dry_run=true
       shift
       ;;
+    -h|--help)
+      show_help
+      ;;
     *)
       shift
       ;;
@@ -68,8 +82,6 @@ if [ -z "$changes" ]; then
 fi
 
 branch_name=$(git rev-parse --abbrev-ref HEAD)
-
-# Extract issue number from the branch name (e.g., feature/issue-123 -> 123)
 issue_number=$(echo "$branch_name" | grep -oE '[0-9]+')
 
 commit_message_lines=()
@@ -105,7 +117,6 @@ done <<< "$changes"
 
 date_time="$(date +'%Y-%m-%d %H:%M:%S')"
 
-# Construct commit message
 commit_message=""
 if [ -n "$issue_number" ]; then
   commit_message="(#$issue_number) [$date_time]"
@@ -113,19 +124,17 @@ else
   commit_message="[$date_time]"
 fi
 
-# If no custom message is provided, default to the first line of changes
 if [ -n "$custom_message" ]; then
   commit_message+=" $custom_message"
 else
   commit_message+=" ${commit_message_plain[0]}"
 fi
 
-# Append the rest of the changes
 for msg in "${commit_message_plain[@]:1}"; do
   commit_message+="\n$msg"
 done
 
-# Show colored commit preview
+# Show commit preview
 echo -e "\n${GREEN}Commit Preview:${RESET}"
 echo -e "${CYAN}$commit_message${RESET}"
 for msg in "${commit_message_lines[@]}"; do
@@ -152,7 +161,7 @@ loader() {
   echo -ne "\r${CYAN}Pushed changes successfully!${RESET}\n"
 }
 
-# Start the commit and push in the background
+# Start commit and push in the background
 {
   git commit -m "$(echo -e "$commit_message")" >/dev/null 2>&1
   git push >/dev/null 2>&1
