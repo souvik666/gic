@@ -108,11 +108,15 @@ else
   commit_message="[$date_time]"
 fi
 
+# If no custom message is provided, default to the first line of changes
 if [ -n "$custom_message" ]; then
   commit_message+=" $custom_message"
+else
+  commit_message+=" ${commit_message_plain[0]}"
 fi
 
-for msg in "${commit_message_plain[@]}"; do
+# Append the rest of the changes
+for msg in "${commit_message_plain[@]:1}"; do
   commit_message+="\n$msg"
 done
 
