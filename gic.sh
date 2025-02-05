@@ -2,7 +2,7 @@
 
 CONFIG_FILE="./gic.config.json"
 
-
+# Detect OS
 OS_TYPE=$(uname -s)
 
 # Define colors (Works in Linux/macOS/Git Bash)
@@ -40,11 +40,16 @@ fi
 
 # Parse command-line arguments
 custom_message=""
+dry_run=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     -m|--message)
       custom_message="$2"
       shift 2
+      ;;
+    --dry-run)
+      dry_run=true
+      shift
       ;;
     *)
       shift
@@ -116,13 +121,19 @@ for msg in "${commit_message_plain[@]}"; do
   commit_message+="\n$msg"
 done
 
-# Show colored commit preview but commit without colors
+# Show commit preview
 echo -e "\n${GREEN}Commit Preview:${RESET}"
 echo -e "${CYAN}$commit_message${RESET}"
 for msg in "${commit_message_lines[@]}"; do
   echo -e "$msg"
 done
 echo ""
+
+# Dry Run Mode: Exit without committing
+if [ "$dry_run" = true ]; then
+  echo -e "${YELLOW}Dry Run: No changes were committed or pushed.${RESET}"
+  exit 0
+fi
 
 # Commit changes
 git commit -m "$(echo -e "$commit_message")"
