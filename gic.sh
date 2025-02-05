@@ -40,11 +40,16 @@ fi
 
 # Parse command-line arguments
 custom_message=""
+dry_run=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     -m|--message)
       custom_message="$2"
       shift 2
+      ;;
+    -d|--dry-run)
+      dry_run=true
+      shift
       ;;
     *)
       shift
@@ -120,7 +125,7 @@ for msg in "${commit_message_plain[@]:1}"; do
   commit_message+="\n$msg"
 done
 
-# Show colored commit preview but commit without colors
+# Show colored commit preview
 echo -e "\n${GREEN}Commit Preview:${RESET}"
 echo -e "${CYAN}$commit_message${RESET}"
 for msg in "${commit_message_lines[@]}"; do
@@ -128,8 +133,30 @@ for msg in "${commit_message_lines[@]}"; do
 done
 echo ""
 
-# Commit changes
-git commit -m "$(echo -e "$commit_message")"
-echo -e "${CYAN}Pushing to remote...${RESET}"
-git push
-echo -e "${GREEN}✅ Done!${RESET}"
+if [ "$dry_run" = true ]; then
+  echo -e "${YELLOW}Dry run complete. No changes were committed or pushed.${RESET}"
+  exit 0
+fi
+
+# Custom loader function for pushing
+loader() {
+  local pid=$!
+  local delay=0.2
+  local spin=('|' '/' '-' '\\')
+  local i=0
+  while kill -0 $pid 2>/dev/null; do
+    i=$(( (i+1) % 4 ))
+    echo -ne "\r${CYAN}Pushing changes... ${spin[i]}"
+    sleep $delay
+  done
+  echo -ne "\r${CYAN}Pushed changes successfully!${RESET}\n"
+}
+
+# Start the commit and push in the background
+{
+  git commit -m "$(echo -e "$commit_message")" >/dev/null 2>&1
+  git push >/dev/null 2>&1
+} &
+
+# Show custom loader during push process
+loader
