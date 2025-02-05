@@ -1,10 +1,10 @@
 {
   "name": "@souvik666/gic",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "main": "index.js",
   "keywords": [],
   "scripts": {
-    "release":"npm version patch && npm publish --access public"
+    "release": "npm version patch && npm publish --access public"
   },
   "author": {
     "name": "souvik666",
