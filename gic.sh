@@ -2,7 +2,7 @@
 
 CONFIG_FILE="./gic.config.json"
 
-# Detect OS
+
 OS_TYPE=$(uname -s)
 
 # Define colors (Works in Linux/macOS/Git Bash)
