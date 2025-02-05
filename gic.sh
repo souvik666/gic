@@ -2,7 +2,7 @@
 
 CONFIG_FILE="./gic.config.json"
 
-
+# Detect OS
 OS_TYPE=$(uname -s)
 
 # Define colors (Works in Linux/macOS/Git Bash)
@@ -22,14 +22,14 @@ else
   RESET=""
 fi
 
-# Default commit tags
+# Default commit tags (Plain text for commit message)
 MODIFIED_TAG="🔧 UPDATED"
 ADDED_TAG="✨ ADDED"
 DELETED_TAG="🗑️ REMOVED"
 NEW_TAG="📄 NEW"
 OTHER_TAG="🔄 OTHER"
 
-# Load tags from config if available
+# Load tags from config if the file exists
 if [ -f "$CONFIG_FILE" ]; then
   MODIFIED_TAG=$(jq -r '.modified' "$CONFIG_FILE")
   ADDED_TAG=$(jq -r '.added' "$CONFIG_FILE")
@@ -102,23 +102,25 @@ date_time="$(date +'%Y-%m-%d %H:%M:%S')"
 
 # Construct commit message
 commit_message=""
-if [ -n "$issue_number" ]; then
-  commit_message="(#$issue_number) [$date_time]"
-else
-  commit_message="[$date_time]"
-fi
-
 if [ -n "$custom_message" ]; then
-  commit_message+=" $custom_message"
+  commit_message="$custom_message"
 fi
 
-for msg in "${commit_message_plain[@]}"; do
-  commit_message+="\n$msg"
+if [ -n "$issue_number" ]; then
+  commit_message+="\n(#$issue_number) [$date_time] ${commit_message_plain[0]}"
+else
+  commit_message+="\n[$date_time] ${commit_message_plain[0]}"
+fi
+
+for ((i=1; i<${#commit_message_plain[@]}; i++)); do
+  commit_message+="\n${commit_message_plain[i]}"
 done
 
 # Show colored commit preview but commit without colors
 echo -e "\n${GREEN}Commit Preview:${RESET}"
-echo -e "${CYAN}$commit_message${RESET}"
+if [ -n "$custom_message" ]; then
+  echo -e "${CYAN}Custom Message:${RESET} $custom_message"
+fi
 for msg in "${commit_message_lines[@]}"; do
   echo -e "$msg"
 done
