@@ -1,4 +1,5 @@
- 
+ ![9320](https://github.com/user-attachments/assets/512fbc55-8380-41a7-8ffe-faf3fc11ed45)
+
 # GIC (Git Commit Automation Script) - Command Line Tool
 
 ## Overview
