@@ -22,14 +22,14 @@ else
   RESET=""
 fi
 
-# Default commit tags (Plain text for commit message)
+# Default commit tags
 MODIFIED_TAG="🔧 UPDATED"
 ADDED_TAG="✨ ADDED"
 DELETED_TAG="🗑️ REMOVED"
 NEW_TAG="📄 NEW"
 OTHER_TAG="🔄 OTHER"
 
-# Load tags from config if the file exists
+# Load tags from config if available
 if [ -f "$CONFIG_FILE" ]; then
   MODIFIED_TAG=$(jq -r '.modified' "$CONFIG_FILE")
   ADDED_TAG=$(jq -r '.added' "$CONFIG_FILE")
@@ -37,6 +37,20 @@ if [ -f "$CONFIG_FILE" ]; then
   NEW_TAG=$(jq -r '.new' "$CONFIG_FILE")
   OTHER_TAG=$(jq -r '.other' "$CONFIG_FILE")
 fi
+
+# Parse command-line arguments
+custom_message=""
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -m|--message)
+      custom_message="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
 
 # Add all changes
 git add .
@@ -86,18 +100,25 @@ done <<< "$changes"
 
 date_time="$(date +'%Y-%m-%d %H:%M:%S')"
 
+# Construct commit message
+commit_message=""
 if [ -n "$issue_number" ]; then
-  commit_message="(#$issue_number) [$date_time] ${commit_message_plain[0]}"
+  commit_message="(#$issue_number) [$date_time]"
 else
-  commit_message="[$date_time] ${commit_message_plain[0]}"
+  commit_message="[$date_time]"
 fi
 
-for ((i=1; i<${#commit_message_plain[@]}; i++)); do
-  commit_message+="\n${commit_message_plain[i]}"
+if [ -n "$custom_message" ]; then
+  commit_message+=" $custom_message"
+fi
+
+for msg in "${commit_message_plain[@]}"; do
+  commit_message+="\n$msg"
 done
 
 # Show colored commit preview but commit without colors
 echo -e "\n${GREEN}Commit Preview:${RESET}"
+echo -e "${CYAN}$commit_message${RESET}"
 for msg in "${commit_message_lines[@]}"; do
   echo -e "$msg"
 done
