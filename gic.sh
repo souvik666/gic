@@ -33,20 +33,20 @@ show_help() {
   exit 0
 }
 
-# Default commit tags
-MODIFIED_TAG="\ud83d\udee0 UPDATED"
-ADDED_TAG="\u2728 ADDED"
-DELETED_TAG="\ud83d\uddd1\ufe0f REMOVED"
-NEW_TAG="\ud83d\udcc4 NEW"
-OTHER_TAG="\ud83d\udd04 OTHER"
+# Default commit tags (Use actual Unicode characters)
+MODIFIED_TAG="🛠 UPDATED"
+ADDED_TAG="✨ ADDED"
+DELETED_TAG="🗑️ REMOVED"
+NEW_TAG="📄 NEW"
+OTHER_TAG="🔄 OTHER"
 
 # Load tags from config if available
 if [ -f "$CONFIG_FILE" ]; then
-  MODIFIED_TAG=$(jq -r '.modified' "$CONFIG_FILE")
-  ADDED_TAG=$(jq -r '.added' "$CONFIG_FILE")
-  DELETED_TAG=$(jq -r '.deleted' "$CONFIG_FILE")
-  NEW_TAG=$(jq -r '.new' "$CONFIG_FILE")
-  OTHER_TAG=$(jq -r '.other' "$CONFIG_FILE")
+  MODIFIED_TAG=$(jq -r '.modified' "$CONFIG_FILE" | sed 's/\\u/\\\\u/g' | xargs -0 printf "%b")
+  ADDED_TAG=$(jq -r '.added' "$CONFIG_FILE" | sed 's/\\u/\\\\u/g' | xargs -0 printf "%b")
+  DELETED_TAG=$(jq -r '.deleted' "$CONFIG_FILE" | sed 's/\\u/\\\\u/g' | xargs -0 printf "%b")
+  NEW_TAG=$(jq -r '.new' "$CONFIG_FILE" | sed 's/\\u/\\\\u/g' | xargs -0 printf "%b")
+  OTHER_TAG=$(jq -r '.other' "$CONFIG_FILE" | sed 's/\\u/\\\\u/g' | xargs -0 printf "%b")
 fi
 
 # Parse command-line arguments
